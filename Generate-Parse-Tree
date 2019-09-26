@@ -1,0 +1,304 @@
+/*
+GRAMMAR
+
+Exp  ->		 Exp + Term
+			|Exp - Term
+			|Term
+Term ->		Term / Factor
+			|Term * Factor
+			|Factor
+Factor ->	id |operator
+
+id is any alphabet or number
+*/
+#include <iostream>
+#include <cctype>
+using namespace std;
+
+struct node {
+	char node_type;
+	char data;
+	int no_of_child_nodes = -1;
+	node *next[10];
+	node* prev;
+};
+
+int input_type(char ch) {
+	//return 1 if ch is an identifier
+	//return 2 if ch is +,-
+	//return 3 if ch is /,*
+	if (ch == '+' || ch == '-') {
+		return 1;
+	}
+	else if (ch == '/' || ch == '*') {
+		return 2;
+	}
+	else{
+		return 3;
+	}	
+}
+
+void main() {
+	int no_of_terminals = 0, no_of_non_terminals = 0;
+	node* n;
+	node* h;
+	node* t;
+	
+	char in[10];
+	cout << "Enter ";
+	cin >> in;
+
+	n = new node;
+	n->node_type = 'E';
+	t = n;
+	h = n;
+	no_of_non_terminals++;
+	int j;
+	for (int i = 0; i < strlen(in); i++) {
+		//Always keeping track of where t is and moving accordingly
+		if (t->node_type == 'E') {
+			switch (input_type(in[i])) {
+
+			// Expression ---> operator (+,-)
+			case 1: // read +,-				
+				cout << "E ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;				//create new node
+				n->data = in[i];			// data = current input
+				n->next[0] = NULL;			//leaf node (aka terminal)
+				n->prev = t;				//new node points to root node
+
+				j = t->no_of_child_nodes;	// t is pointing to E (the root node)
+				j++;						// the number of child nodes = j+1
+				t->next[j] = n;				// root node now points to a new leaf node
+				t->no_of_child_nodes = j;	//increment no_of_child_nodes of root node
+				
+				no_of_terminals++;
+				break;
+
+			// Expression ---> Term ---> operator (/,*)
+			case 2: // read *,/
+				n = new node;
+				n->node_type = 'T';	
+				n->prev = t;			// New T node points to root node E
+
+				j = t->no_of_child_nodes;	
+				j++;
+				t->next[j] = n;			// E points to new node T
+				t->no_of_child_nodes = j;// A new child node of E
+								
+				t = n;					// t points to new node
+
+				cout << "T ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;
+				n->data = in[i];
+				n->next[0] = NULL;
+				n->prev = t;
+
+				t->no_of_child_nodes = j;// A new child node of T
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//T points to new node
+
+				no_of_non_terminals++;
+				no_of_terminals++;
+				break;
+
+			// Expression ---> Term ---> Factor ---> identifier
+			case 3: //id, num, or op
+				n = new node;
+				n->node_type = 'T';
+				n->prev = t;			// New T node points to root node E
+
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			// E points to new node T
+				t->no_of_child_nodes = j;// A new child node of E
+				t = n;					// t points to new node
+
+				n = new node;			//creating new Factor node
+				n->node_type = 'F';
+				n->prev = t;
+
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//T points to new node F
+				t->no_of_child_nodes = j;
+				t = n;
+
+				cout << "E ---> T ---> F ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;
+				n->data = in[i];
+				n->next[0] = NULL;
+				n->prev = t;
+
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//F points to new node 
+				t->no_of_child_nodes = j;
+				t = n;
+
+				no_of_non_terminals+=2;
+				no_of_terminals++;
+				break;
+			}
+
+		}
+		else if (t->node_type == 'T') {
+			switch (input_type(in[i])) {
+			case 1:
+
+				t = t->prev; //t now points to E. t is at root node
+
+				cout << "E ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;				//create new node
+				n->data = in[i];			// data = current input
+				n->next[0] = NULL;			//leaf node (aka terminal)
+
+				j = t->no_of_child_nodes;	// t is pointing to E (the root node)
+				j++;						// the number of child nodes = j+1
+				t->next[j] = n;				// root node now points to a new leaf node
+				t->no_of_child_nodes = j;	//increment no_of_child_nodes of root node
+
+				n->prev = t;				//new node points to root node
+
+				no_of_terminals++;
+				break;
+
+			case 2:
+				cout << "T ---> ";
+				cout << in[i];
+				cout << "\n\n";
+				
+				n = new node;				//create new node
+				n->data = in[i];			// data = current input
+				n->next[0] = NULL;			//leaf node (aka terminal)
+
+				j = t->no_of_child_nodes;	// t is pointing to E (the root node)
+				j++;						// the number of child nodes = j+1
+				t->next[j] = n;				// root node now points to a new leaf node
+				t->no_of_child_nodes = j;	//increment no_of_child_nodes of root node
+
+				n->prev = t;				//new node points to root node
+
+				no_of_terminals++;
+				break;
+
+			case 3:
+				n = new node;			//creating new Factor node
+				n->node_type = 'F';
+				n->prev = t;
+
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//T points to new node F
+				t->no_of_child_nodes = j;
+				t = n;
+
+				cout << "E ---> T ---> F ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;
+				n->data = in[i];
+				n->next[0] = NULL;
+				n->prev = t;
+
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//F points to new node 
+				t->no_of_child_nodes = j;
+				t = n;
+
+				no_of_non_terminals += 2;
+				no_of_terminals++;
+				break;
+			}
+		}
+		else if (t->node_type == 'F') {
+			switch (input_type(in[i])) {
+			case 1:
+				t = t->prev; //goes from F to T
+				t = t->prev; //goes form T to E
+
+				cout << "E ---> ";
+				cout << in[i];
+				cout << "\n\n";
+				
+				n = new node;				//create new node
+				n->data = in[i];			// data = current input
+				n->next[0] = NULL;			//leaf node (aka terminal)
+
+				j = t->no_of_child_nodes;	// t is pointing to E (the root node)
+				j++;						// the number of child nodes = j+1
+				t->next[j] = n;				// root node now points to a new leaf node
+				t->no_of_child_nodes = j;	//increment no_of_child_nodes of root node
+
+				n->prev = t;				//new node points to root node
+
+
+				no_of_terminals++;
+				break;
+
+			case 2:
+				t = t->prev; //goes form F to T
+
+				cout << "T ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;
+				n->data = in[i];
+				n->next[0] = NULL;
+				n->prev = t;
+
+				t->no_of_child_nodes = j;// A new child node of T
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//T points to new node
+
+				no_of_terminals++;
+				break;
+
+			case 3:
+				cout << "F ---> ";
+				cout << in[i];
+				cout << "\n\n";
+
+				n = new node;
+				n->data = in[i];
+				n->next[0] = NULL;
+				n->prev = t;
+
+				t->no_of_child_nodes = j;// A new child node of T
+				j = t->no_of_child_nodes;
+				j++;
+				t->next[j] = n;			//T points to new node
+
+				no_of_terminals++;
+				break;
+			}
+		}
+	}
+
+	cout << "Number of Non-Terminals = ";
+	cout << no_of_non_terminals;
+	cout << "\n";
+	cout << "Number of Terminals = ";
+	cout << no_of_terminals;
+	cout << "\n";
+
+
+}
+
