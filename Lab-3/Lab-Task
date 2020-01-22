@@ -1,0 +1,16 @@
+2.	Project should be done on laptop/ raspberry pi 
+3.	Redhat / fedora / Raspbian operating system (Windows operating system not allowed)
+4.	Connect raspberry pi or laptop using LAN / Wi-Fi
+5.	Ping both devices
+6.	Create buffer by using FIFO at each node.
+7.	Buffer occupancy will be given by:
+a.	B (t+1)= B(t) + B(i) - B(o)
+8.	Child and parent both will generate get data from child
+9.	Parent will send a signal to child to slow down
+10.	Transport data using UDP/TCP/RTP.
+
+Input: Data rate at both PC’s
+Output: 
+1: Data rate (at both PCs), at second PC data rate will be double of 1st PC in output) 
+2: instantaneous Buffer occupancy (Buffer condition after each second, Increase data rate in case of buffer underflow, and decrease data rate in case of buffer overflow)
+Increase and decrease instructions should be performed by child node. Moreover, Instruction will be given by parent node to child node in case of buffer overflow and buffer underflow.
